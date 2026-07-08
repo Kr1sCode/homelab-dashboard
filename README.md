@@ -1,171 +1,173 @@
 # HOME-LAB · Mission Control
 
-**Jednoplikowy dashboard kiosk dla domowego home-laba** — jeden ekran, na którym w czasie
-rzeczywistym widać kondycję całej infrastruktury i kilka rzeczy z życia codziennego. Zero
-frameworków, zero procesu budowania, zero zależności: cały interfejs to **jeden plik HTML**
-z ręcznie rysowanymi wykresami SVG, uruchamiany na dedykowanym mini-PC w trybie pełnoekranowym.
+**A single-file kiosk dashboard for a home lab** — one screen showing the health of the
+whole infrastructure in real time, plus a few things from everyday life. Zero frameworks,
+zero build step, zero dependencies: the entire UI is **one HTML file** with hand-drawn SVG
+charts, running full-screen on a dedicated mini-PC.
 
-Estetyka celowo utrzymana w klimacie **„mission control z XXII wieku"** — ciemne tło, miętowo-turkusowy
-akcent i font monospace, dopasowane kolorystycznie do [krzysztofgawkowski.pl](https://krzysztofgawkowski.pl).
+The aesthetic is deliberately **"22nd-century mission control"** — dark background, mint-teal
+accent and a monospace font, colour-matched to [krzysztofgawkowski.pl](https://krzysztofgawkowski.pl).
 
-![Dashboard na monitorze pionowym](docs/dashboard.jpg)
-
----
-
-## 🧭 Od strony praktycznej — do czego to służy
-
-Zamiast logować się do kilku osobnych paneli (osobno monitoring hostów, osobno statusy usług,
-osobno kamera, pogoda, kalendarz…), mam **jeden zawsze-włączony ekran**, który sam wszystko
-zbiera i pokazuje. Wisi na ścianie na monitorze w orientacji pionowej i po prostu działa —
-bez klikania, bez logowania, bez utrzymania.
-
-Na jednym widoku:
-
-- **Dostępność 24 h** wszystkich monitorowanych usług (z Uptime Kuma),
-- **Temperatury hostów** z progami kolorów (zielony → pomarańczowy → czerwony),
-- **Ruch sieciowy** — zagregowany wykres góra/dół całego home-laba,
-- **Kursy** — USD, EUR, złoto, BTC, LTC, S&P500, ceny paliw (Pb95 / diesel),
-- **Kalendarz miesiąca** z wydarzeniami z prywatnego Google Calendar,
-- **Podgląd z kamery IP** (Hikvision) na żywo,
-- **Pogoda** dla wybranej lokalizacji + prognoza na 5 dni,
-- **Pasek RSS** z nagłówkami (PAP MediaRoom) oraz zegar i data.
-
-**Kluczowa cecha: pełna automatyka.** Dodajesz nowy host w Beszelu albo nowy monitor w Uptime
-Kuma — pojawia się na dashboardzie sam, bez dotykania kodu. Nic nie trzeba klikać ani restartować.
+![Dashboard on a portrait monitor](docs/dashboard.jpg)
 
 ---
 
-## ✨ Funkcje
+## 🧭 The practical side — what it's for
 
-- 🖥️ **Jeden plik, zero zależności** — działa z `file://`, offline-first, nic nie instaluje.
-- 🔁 **Full-auto** — nowe hosty/monitory zaciągają się automatycznie.
-- 🔄 **Rotacja wpisów** — panele dostępności i temperatur przewijają kolejne strony co 10 s (licznik `1/3`, `2/3`…), więc mieści się dowolna liczba pozycji.
-- 📈 **Ręcznie rysowane wykresy SVG** — sparkline’y i wykresy obszarowe bez żadnej biblioteki.
-- 📷 **Kamera w przeglądarce mimo RTSP** — snapshot proxy + `fetch → blob → objectURL` + podwójne buforowanie z `img.decode()` (brak migotania), etykieta **NA ŻYWO / OFFLINE** wg stanu łącza.
-- 🌡️ **Progi kolorów** dla temperatur i dostępności.
-- 🖼️ **Dwie orientacje** — osobne pliki: pozioma i pionowa, generowane ze wspólnego źródła.
-- ⚡ **Zoptymalizowane pod słaby GPU** (Lenovo m625q) — izolacja warstw kompozytora, skalowanie kamery do 720p.
-- 🎨 **Spójna identyfikacja wizualna** z prywatną stroną autora.
+Instead of logging into several separate panels (host monitoring in one place, service
+statuses in another, plus the camera, weather, calendar…), I have **one always-on screen**
+that gathers and shows everything by itself. It hangs on the wall on a portrait monitor and
+just works — no clicking, no logging in, no maintenance.
+
+At a glance:
+
+- **24 h uptime** of every monitored service (from Uptime Kuma),
+- **Host temperatures** with colour thresholds (green → orange → red),
+- **Network traffic** — an aggregated up/down chart for the whole home lab,
+- **Rates** — USD, EUR, gold, BTC, LTC, S&P 500, fuel prices (95-octane / diesel),
+- **Month calendar** with events from a private Google Calendar,
+- **Live IP-camera feed** (Hikvision),
+- **Weather** for a chosen location + a 5-day forecast,
+- **RSS ticker** with headlines (PAP MediaRoom), plus a clock and date.
+
+**Key trait: full automation.** Add a new host in Beszel or a new monitor in Uptime Kuma —
+it shows up on the dashboard on its own, without touching the code. Nothing to click, nothing
+to restart.
 
 ---
 
-## 🏗️ Od strony technicznej — jak to działa
+## ✨ Features
 
-### Architektura
+- 🖥️ **One file, zero dependencies** — runs from `file://`, offline-first, installs nothing.
+- 🔁 **Full-auto** — new hosts/monitors are pulled in automatically.
+- 🔄 **Entry rotation** — the uptime and temperature panels page through their entries every 10 s (a `1/3`, `2/3`… counter), so any number of items fits.
+- 📈 **Hand-drawn SVG charts** — sparklines and area charts with no library at all.
+- 📷 **Camera in the browser despite RTSP** — snapshot proxy + `fetch → blob → objectURL` + double-buffering with `img.decode()` (no flicker), with a **LIVE / OFFLINE** label based on link state.
+- 🌡️ **Colour thresholds** for temperatures and uptime.
+- 🖼️ **Two orientations** — separate files: landscape and portrait, generated from a shared source.
+- ⚡ **Optimised for a weak GPU** (Lenovo m625q) — compositor layer isolation, camera scaled to 720p.
+- 🎨 **Consistent visual identity** with the author's personal site.
+
+---
+
+## 🏗️ The technical side — how it works
+
+### Architecture
 
 ```
 ┌──────────────────────────────┐        LAN         ┌───────────────────────────┐
-│  Mini-PC (kiosk)             │  ───── HTTP ─────▶  │  Host LXC / serwer .7     │
+│  Mini-PC (kiosk)             │  ───── HTTP ─────▶  │  LXC host / server .7     │
 │  Debian + XFCE               │                    │                           │
-│  przeglądarka pełny ekran    │  ◀── JSON/JPEG ──   │  mikro-proxy (Node.js):   │
+│  full-screen browser         │  ◀── JSON/JPEG ──   │  micro-proxies (Node.js): │
 │  homelab-kiosk-pion.html     │                    │   • cam-proxy   :8899     │
 └──────────────────────────────┘                    │   • ical-proxy  :8898     │
-        │  bezpośrednio (CORS OK)                    │   • rss-proxy   :8897     │
+        │  direct (CORS OK)                          │   • rss-proxy   :8897     │
         ▼                                            │   • rates-proxy :8896     │
-   Beszel :8090  (metryki hostów)                    └───────────────────────────┘
-   Uptime Kuma :3001  (statusy usług)                          │
-   Open-Meteo API  (pogoda)                                    ▼
-                                                    kamera Hikvision / Google iCal /
+   Beszel :8090  (host metrics)                      └───────────────────────────┘
+   Uptime Kuma :3001  (service status)                        │
+   Open-Meteo API  (weather)                                  ▼
+                                                    Hikvision camera / Google iCal /
                                                     PAP RSS / NBP / CoinGecko / Yahoo
 ```
 
-Front-end łączy się **wprost** ze źródłami, które podają CORS (Beszel, Uptime Kuma, Open-Meteo),
-a wszystko, co CORS-u nie podaje lub wymaga poświadczeń (kamera, kalendarz, RSS, kursy),
-przechodzi przez **warstwę mikro-proxy** w Node.js (opis: [`proxies/`](proxies/)). Dzięki temu
-żadne dane logowania nie trafiają do pliku HTML.
+The front-end connects **directly** to sources that send CORS headers (Beszel, Uptime Kuma,
+Open-Meteo), while anything that doesn't send CORS or needs credentials (camera, calendar,
+RSS, rates) goes through a **micro-proxy layer** in Node.js (see [`proxies/`](proxies/)). This
+way no credentials ever end up in the HTML file.
 
-### Źródła danych
+### Data sources
 
-| Widget | Źródło | Sposób pobrania |
+| Widget | Source | How it's fetched |
 |---|---|---|
-| Dostępność 24 h | Uptime Kuma (SQLite/Express) | bezpośrednio, konto read-only |
-| Temperatury / metryki | Beszel (PocketBase) | bezpośrednio, konto read-only |
-| Ruch sieciowy | Beszel — agregacja wszystkich hostów | liczone w kliencie |
-| Pogoda + prognoza | Open-Meteo | bezpośrednio (publiczne, CORS) |
-| Kamera | Hikvision ISAPI (digest) | `cam-proxy` → JPEG 720p |
-| Kalendarz | prywatny Google Calendar (iCal) | `ical-proxy` (parser `RRULE`) |
-| Pasek RSS | PAP MediaRoom | `rss-proxy` |
-| Kursy | NBP, CoinGecko, Yahoo Finance, ceny paliw | `rates-proxy` (uśrednianie + odrzut wartości odstających) |
+| 24 h uptime | Uptime Kuma (SQLite/Express) | direct, read-only account |
+| Temperatures / metrics | Beszel (PocketBase) | direct, read-only account |
+| Network traffic | Beszel — aggregate of all hosts | computed client-side |
+| Weather + forecast | Open-Meteo | direct (public, CORS) |
+| Camera | Hikvision ISAPI (digest) | `cam-proxy` → JPEG 720p |
+| Calendar | private Google Calendar (iCal) | `ical-proxy` (`RRULE` parser) |
+| RSS ticker | PAP MediaRoom | `rss-proxy` |
+| Rates | NBP, CoinGecko, Yahoo Finance, fuel prices | `rates-proxy` (averaging + outlier rejection) |
 
-### Rendering i wydajność
+### Rendering and performance
 
-- **Wykresy** rysowane ręcznie jako inline SVG (ścieżki `path`) — brak D3/Chart.js itp.
-- **Układ** na CSS Grid (`grid-template-areas`), animacje wyłącznie na `transform`/`opacity` (wątek kompozytora).
-- **Kamera bez migotania** — dwa `<img>` przełączane naprzemiennie, nowa klatka pokazywana dopiero po `await img.decode()`.
-- **Optymalizacja pod iGPU** — panel kamery i nagłówek z tickerem wydzielone na osobne warstwy
-  kompozytora (`contain` + `translateZ(0)` + `isolation`), tak by ~1 Mpix tekstury kamery nie
-  wymuszało re-rasteryzacji reszty ekranu. Kamera skalowana do 720p już po stronie Hikvision.
-- **Odświeżanie** — dane co 60 s, kamera co 1,2 s, zegar co 10 s, jeden „miękki" reload na dobę.
+- **Charts** drawn by hand as inline SVG (`path` elements) — no D3/Chart.js etc.
+- **Layout** on CSS Grid (`grid-template-areas`); animations only on `transform`/`opacity` (compositor thread).
+- **Flicker-free camera** — two `<img>` elements swapped alternately, a new frame shown only after `await img.decode()`.
+- **iGPU optimisation** — the camera panel and the ticker header are split onto separate
+  compositor layers (`contain` + `translateZ(0)` + `isolation`), so the ~1 Mpix camera texture
+  doesn't force the rest of the screen to re-rasterise. The camera is scaled to 720p on the
+  Hikvision side.
+- **Refresh** — data every 60 s, camera every 1.2 s, clock every 10 s, one "soft" reload per day.
 
 ### Stack
 
-`HTML5` · `CSS Grid` · `Vanilla JavaScript (ES6+)` · `SVG` · `Node.js` (proxy) ·
+`HTML5` · `CSS Grid` · `Vanilla JavaScript (ES6+)` · `SVG` · `Node.js` (proxies) ·
 `systemd` · `Beszel` · `Uptime Kuma` · `Open-Meteo` · `Hikvision ISAPI`
 
 ---
 
-## 📁 Struktura repo
+## 📁 Repo structure
 
 ```
 .
-├── homelab-kiosk-pion.html   # dashboard — wersja PIONOWA (monitor w pionie)
-├── homelab-kiosk.html        # dashboard — wersja POZIOMA
-├── proxies/                  # warstwa CORS (Node.js + systemd, zero zależności)
-│   ├── cam-proxy.cjs         # kamera Hikvision (ISAPI, digest) → JPEG 720p
-│   ├── ical-proxy.cjs        # Google Calendar (iCal) → JSON, parser RRULE
+├── homelab-kiosk-pion.html   # dashboard — PORTRAIT version (vertical monitor)
+├── homelab-kiosk.html        # dashboard — LANDSCAPE version
+├── proxies/                  # CORS layer (Node.js + systemd, zero dependencies)
+│   ├── cam-proxy.cjs         # Hikvision camera (ISAPI, digest) → JPEG 720p
+│   ├── ical-proxy.cjs        # Google Calendar (iCal) → JSON, RRULE parser
 │   ├── rss-proxy.cjs         # PAP MediaRoom (RSS) → JSON
-│   ├── rates-proxy.cjs       # NBP / CoinGecko / Yahoo / paliwa → JSON
-│   └── README.md             # opis wszystkich proxy + przykład usługi systemd
+│   ├── rates-proxy.cjs       # NBP / CoinGecko / Yahoo / fuel → JSON
+│   └── README.md             # description of all proxies + a systemd unit example
 ├── scripts/
-│   ├── start-kiosk.sh        # launcher: Chromium --kiosk + wyłączenie wygaszacza
-│   └── kiosk.desktop         # wpis autostartu XFCE/GNOME (~/.config/autostart/)
+│   ├── start-kiosk.sh        # launcher: Chromium --kiosk + screensaver off
+│   └── kiosk.desktop         # XFCE/GNOME autostart entry (~/.config/autostart/)
 ├── docs/
-│   └── dashboard.jpg         # zdjęcie działającego kiosku
+│   └── dashboard.jpg         # photo of the running kiosk
 ├── LICENSE
 └── README.md
 ```
 
-## 🚀 Uruchomienie
+## 🚀 Getting started
 
-1. Uzupełnij blok `CONFIG` na górze `homelab-kiosk-pion.html` własnymi adresami (placeholdery `10.0.0.x`).
-2. Postaw mikro-proxy z katalogu [`proxies/`](proxies/) jako usługi systemd.
-3. Odpal dashboard w trybie kiosk skryptem [`scripts/start-kiosk.sh`](scripts/start-kiosk.sh) (patrz niżej).
+1. Fill in the `CONFIG` block at the top of `homelab-kiosk-pion.html` with your own addresses (the `10.0.0.x` placeholders).
+2. Stand up the micro-proxies from [`proxies/`](proxies/) as systemd services.
+3. Launch the dashboard in kiosk mode with [`scripts/start-kiosk.sh`](scripts/start-kiosk.sh) (see below).
 
-### Autostart kiosku (XFCE / dowolny Linux z X11)
+### Kiosk autostart (XFCE / any Linux with X11)
 
-Skrypt [`scripts/start-kiosk.sh`](scripts/start-kiosk.sh) uruchamia Chromium w trybie
-`--kiosk` (pełny ekran, bez ramek), wyłącza wygaszacz i DPMS oraz trzyma osobny profil
-przeglądarki (bez dymka „przywróć sesję" po nagłym wyłączeniu). Sam wykrywa `chromium`,
-`google-chrome` lub `brave`.
+[`scripts/start-kiosk.sh`](scripts/start-kiosk.sh) launches Chromium in `--kiosk` mode
+(full screen, no chrome), turns off the screensaver and DPMS, and keeps a separate browser
+profile (no "restore session" bubble after an abrupt shutdown). It auto-detects `chromium`,
+`google-chrome` or `brave`.
 
 ```bash
-# 1. Skopiuj projekt na maszynę kiosku, np. do /opt/kiosk
+# 1. Copy the project to the kiosk machine, e.g. to /opt/kiosk
 sudo mkdir -p /opt/kiosk && sudo cp -r . /opt/kiosk && sudo chown -R "$USER" /opt/kiosk
 
-# 2. Sprawdź ręcznie (Ctrl+C zamyka)
-/opt/kiosk/scripts/start-kiosk.sh                 # wersja pionowa (domyślnie)
-KIOSK_FILE=/opt/kiosk/homelab-kiosk.html /opt/kiosk/scripts/start-kiosk.sh   # pozioma
+# 2. Test it by hand (Ctrl+C quits)
+/opt/kiosk/scripts/start-kiosk.sh                 # portrait version (default)
+KIOSK_FILE=/opt/kiosk/homelab-kiosk.html /opt/kiosk/scripts/start-kiosk.sh   # landscape
 
-# 3. Autostart z sesją XFCE
+# 3. Autostart with the XFCE session
 mkdir -p ~/.config/autostart
 cp /opt/kiosk/scripts/kiosk.desktop ~/.config/autostart/
-# ustaw w skopiowanym pliku właściwą ścieżkę w linii Exec= (domyślnie /opt/kiosk/...)
+# set the correct path in the Exec= line of the copied file (defaults to /opt/kiosk/...)
 ```
 
-Po ponownym zalogowaniu (lub restarcie maszyny z autologowaniem) dashboard wystartuje sam,
-na pełnym ekranie. Warto włączyć w XFCE **autologowanie** użytkownika kiosku, żeby po
-zaniku zasilania wszystko wróciło bez ingerencji.
+After logging back in (or rebooting a machine with autologin) the dashboard starts on its own,
+full screen. It's worth enabling **autologin** for the kiosk user in XFCE so that everything
+comes back after a power loss without any intervention.
 
-> ⚠️ **Uwaga bezpieczeństwa:** blok `CONFIG` w tym repo zawiera wyłącznie przykładowe
-> placeholdery. Nie commituj tu prawdziwych adresów IP ani haseł — poświadczenia trzymaj
-> tylko w plikach proxy na serwerze.
+> ⚠️ **Security note:** the `CONFIG` block in this repo contains only example placeholders.
+> Don't commit real IP addresses or passwords here — keep credentials only in the proxy files
+> on the server.
 
 ---
 
-## 👤 Autor
+## 👤 Author
 
 **Krzysztof Gawkowski** — [krzysztofgawkowski.pl](https://krzysztofgawkowski.pl) · [github.com/Kr1sCode](https://github.com/Kr1sCode)
 
-## 📄 Licencja
+## 📄 License
 
-MIT — patrz [`LICENSE`](LICENSE).
+MIT — see [`LICENSE`](LICENSE).
