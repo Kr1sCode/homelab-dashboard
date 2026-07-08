@@ -116,6 +116,9 @@ przechodzi przez **warstwę mikro-proxy** w Node.js (opis: [`proxies/`](proxies/
 │   ├── rss-proxy.cjs         # PAP MediaRoom (RSS) → JSON
 │   ├── rates-proxy.cjs       # NBP / CoinGecko / Yahoo / paliwa → JSON
 │   └── README.md             # opis wszystkich proxy + przykład usługi systemd
+├── scripts/
+│   ├── start-kiosk.sh        # launcher: Chromium --kiosk + wyłączenie wygaszacza
+│   └── kiosk.desktop         # wpis autostartu XFCE/GNOME (~/.config/autostart/)
 ├── docs/
 │   └── dashboard.jpg         # zdjęcie działającego kiosku
 ├── LICENSE
@@ -126,7 +129,32 @@ przechodzi przez **warstwę mikro-proxy** w Node.js (opis: [`proxies/`](proxies/
 
 1. Uzupełnij blok `CONFIG` na górze `homelab-kiosk-pion.html` własnymi adresami (placeholdery `10.0.0.x`).
 2. Postaw mikro-proxy z katalogu [`proxies/`](proxies/) jako usługi systemd.
-3. Otwórz plik w przeglądarce w trybie kiosk (pełny ekran) na dedykowanej maszynie.
+3. Odpal dashboard w trybie kiosk skryptem [`scripts/start-kiosk.sh`](scripts/start-kiosk.sh) (patrz niżej).
+
+### Autostart kiosku (XFCE / dowolny Linux z X11)
+
+Skrypt [`scripts/start-kiosk.sh`](scripts/start-kiosk.sh) uruchamia Chromium w trybie
+`--kiosk` (pełny ekran, bez ramek), wyłącza wygaszacz i DPMS oraz trzyma osobny profil
+przeglądarki (bez dymka „przywróć sesję" po nagłym wyłączeniu). Sam wykrywa `chromium`,
+`google-chrome` lub `brave`.
+
+```bash
+# 1. Skopiuj projekt na maszynę kiosku, np. do /opt/kiosk
+sudo mkdir -p /opt/kiosk && sudo cp -r . /opt/kiosk && sudo chown -R "$USER" /opt/kiosk
+
+# 2. Sprawdź ręcznie (Ctrl+C zamyka)
+/opt/kiosk/scripts/start-kiosk.sh                 # wersja pionowa (domyślnie)
+KIOSK_FILE=/opt/kiosk/homelab-kiosk.html /opt/kiosk/scripts/start-kiosk.sh   # pozioma
+
+# 3. Autostart z sesją XFCE
+mkdir -p ~/.config/autostart
+cp /opt/kiosk/scripts/kiosk.desktop ~/.config/autostart/
+# ustaw w skopiowanym pliku właściwą ścieżkę w linii Exec= (domyślnie /opt/kiosk/...)
+```
+
+Po ponownym zalogowaniu (lub restarcie maszyny z autologowaniem) dashboard wystartuje sam,
+na pełnym ekranie. Warto włączyć w XFCE **autologowanie** użytkownika kiosku, żeby po
+zaniku zasilania wszystko wróciło bez ingerencji.
 
 > ⚠️ **Uwaga bezpieczeństwa:** blok `CONFIG` w tym repo zawiera wyłącznie przykładowe
 > placeholdery. Nie commituj tu prawdziwych adresów IP ani haseł — poświadczenia trzymaj

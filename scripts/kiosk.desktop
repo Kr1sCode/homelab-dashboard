@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=HOME-LAB Kiosk
+Comment=Dashboard mission-control w trybie pełnoekranowym
+# Skopiuj do ~/.config/autostart/ i popraw ścieżkę, aby kiosk startował z sesją XFCE:
+#   mkdir -p ~/.config/autostart
+#   cp scripts/kiosk.desktop ~/.config/autostart/
+#   (a następnie ustaw poniżej właściwą ścieżkę do start-kiosk.sh)
+Exec=/opt/kiosk/scripts/start-kiosk.sh
+Terminal=false
+X-GNOME-Autostart-enabled=true
+X-XFCE-Autostart-enabled=true
