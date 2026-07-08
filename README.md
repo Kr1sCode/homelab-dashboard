@@ -108,12 +108,17 @@ przechodzi przez **warstwę mikro-proxy** w Node.js (opis: [`proxies/`](proxies/
 
 ```
 .
-├── homelab-kiosk-pion.html   # dashboard — wersja PIONOWA (na monitor w pionie)
-├── proxies/                  # warstwa CORS (Node.js, systemd)
-│   ├── cam-proxy.cjs         # proxy kamery Hikvision (przykład kompletny)
-│   └── README.md             # opis wszystkich czterech proxy
+├── homelab-kiosk-pion.html   # dashboard — wersja PIONOWA (monitor w pionie)
+├── homelab-kiosk.html        # dashboard — wersja POZIOMA
+├── proxies/                  # warstwa CORS (Node.js + systemd, zero zależności)
+│   ├── cam-proxy.cjs         # kamera Hikvision (ISAPI, digest) → JPEG 720p
+│   ├── ical-proxy.cjs        # Google Calendar (iCal) → JSON, parser RRULE
+│   ├── rss-proxy.cjs         # PAP MediaRoom (RSS) → JSON
+│   ├── rates-proxy.cjs       # NBP / CoinGecko / Yahoo / paliwa → JSON
+│   └── README.md             # opis wszystkich proxy + przykład usługi systemd
 ├── docs/
 │   └── dashboard.jpg         # zdjęcie działającego kiosku
+├── LICENSE
 └── README.md
 ```
 
