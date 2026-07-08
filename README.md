@@ -56,14 +56,14 @@ to restart.
 
 ```
 ┌──────────────────────────────┐        LAN         ┌───────────────────────────┐
-│  Mini-PC (kiosk)             │  ───── HTTP ─────▶  │  LXC host / server .7     │
+│  Mini-PC (kiosk)             │  ───── HTTP ─────▶│  LXC host / server .7     │
 │  Debian + XFCE               │                    │                           │
-│  full-screen browser         │  ◀── JSON/JPEG ──   │  micro-proxies (Node.js): │
+│  full-screen browser         │  ◀── JSON/JPEG ── │  micro-proxies (Node.js): │
 │  homelab-kiosk-pion.html     │                    │   • cam-proxy   :8899     │
 └──────────────────────────────┘                    │   • ical-proxy  :8898     │
-        │  direct (CORS OK)                          │   • rss-proxy   :8897     │
-        ▼                                            │   • rates-proxy :8896     │
-   Beszel :8090  (host metrics)                      └───────────────────────────┘
+        │  direct (CORS OK)                         │   • rss-proxy   :8897     │
+        ▼                                           │   • rates-proxy :8896     │
+   Beszel :8090  (host metrics)                     └───────────────────────────┘
    Uptime Kuma :3001  (service status)                        │
    Open-Meteo API  (weather)                                  ▼
                                                     Hikvision camera / Google iCal /
