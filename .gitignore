@@ -1,0 +1,6 @@
+# Nie commituj wersji z prawdziwymi danymi (adresy IP, hasła)
+homelab-kiosk-pion.local.html
+homelab-kiosk.local.html
+*.secret.*
+node_modules/
+.DS_Store
