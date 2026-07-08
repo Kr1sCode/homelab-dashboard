@@ -6,7 +6,7 @@ zero build step, zero dependencies: the entire UI is **one HTML file** with hand
 charts, running full-screen on a dedicated mini-PC.
 
 The aesthetic is deliberately **"22nd-century mission control"** — dark background, mint-teal
-accent and a monospace font, colour-matched to [krzysztofgawkowski.pl](https://krzysztofgawkowski.pl).
+accent and a monospace font.
 
 ![Dashboard on a portrait monitor](docs/dashboard.jpg)
 
