@@ -1,23 +1,23 @@
-# Proxy danych (warstwa CORS)
+# Data proxies (CORS layer)
 
-Dashboard to **pojedynczy plik HTML uruchamiany z `file://`** — przeglądarka nie pobierze więc
-cross-origin danych bez nagłówka CORS, a części źródeł (kamera, prywatny kalendarz) nie wolno
-odpytywać wprost z pliku, bo ujawniłoby to dane logowania. Rozwiązuje to zestaw mikro-proxy w
-Node.js (zero zależności, każdy ~1 plik), uruchamianych na hoście w sieci lokalnej (u mnie
-kontener LXC) jako usługi `systemd`:
+The dashboard is a **single HTML file run from `file://`** — so the browser can't fetch
+cross-origin data without a CORS header, and some sources (the camera, the private calendar)
+must not be queried straight from the file, as that would expose credentials. This is solved
+by a set of Node.js micro-proxies (zero dependencies, ~1 file each), running on a host on the
+local network (an LXC container in my case) as `systemd` services:
 
-| Usługa            | Port | Rola |
+| Service           | Port | Role |
 |-------------------|------|------|
-| `cam-proxy.cjs`   | 8899 | Snapshot Hikvision (ISAPI, digest) → JPEG z CORS. Skalowanie do 720p po stronie kamery. |
-| `ical-proxy.cjs`  | 8898 | Prywatny iCal (Google Calendar) → JSON. Parsowanie `VEVENT` + rozwijanie reguł `RRULE`. |
-| `rss-proxy.cjs`   | 8897 | RSS (PAP MediaRoom) → JSON z tytułami dla paska przewijanego. |
-| `rates-proxy.cjs` | 8896 | Kursy: NBP (USD/EUR/złoto), CoinGecko (BTC/LTC), Yahoo Finance (S&P500), ceny paliw. |
+| `cam-proxy.cjs`   | 8899 | Hikvision snapshot (ISAPI, digest) → JPEG with CORS. Scaled to 720p on the camera side. |
+| `ical-proxy.cjs`  | 8898 | Private iCal (Google Calendar) → JSON. Parses `VEVENT` + expands `RRULE` rules. |
+| `rss-proxy.cjs`   | 8897 | RSS (PAP MediaRoom) → JSON with titles for the scrolling ticker. |
+| `rates-proxy.cjs` | 8896 | Rates: NBP (USD/EUR/gold), CoinGecko (BTC/LTC), Yahoo Finance (S&P 500), fuel prices. |
 
-Wszystkie działają wg tego samego wzorca co dołączony **`cam-proxy.cjs`**:
-odpytują źródło w tle w stałym interwale, trzymają ostatni wynik w pamięci i serwują go
-pod prostym endpointem HTTP z nagłówkiem `Access-Control-Allow-Origin: *`.
+They all follow the same pattern as the included **`cam-proxy.cjs`**: poll the source in the
+background at a fixed interval, keep the latest result in memory and serve it from a simple
+HTTP endpoint with an `Access-Control-Allow-Origin: *` header.
 
-## Przykład usługi systemd
+## systemd service example
 
 ```ini
 # /etc/systemd/system/cam-proxy.service
@@ -38,5 +38,5 @@ WantedBy=multi-user.target
 sudo systemctl enable --now cam-proxy.service
 ```
 
-> **Uwaga:** dane logowania (kamera, iCal) żyją wyłącznie w plikach proxy na serwerze,
-> nigdy w pliku HTML kiosku.
+> **Note:** credentials (camera, iCal) live only in the proxy files on the server,
+> never in the kiosk HTML file.
