@@ -1,5 +1,9 @@
 # HOME-LAB · Mission Control
 
+[![GitHub stars](https://img.shields.io/github/stars/Kr1sCode/homelab-dashboard?style=flat)](https://github.com/Kr1sCode/homelab-dashboard/stargazers)
+[![License](https://img.shields.io/badge/license-see--LICENSE-blue)](LICENSE)
+[![Last commit](https://img.shields.io/github/last-commit/Kr1sCode/homelab-dashboard)](https://github.com/Kr1sCode/homelab-dashboard/commits/main)
+
 **A single-file kiosk dashboard for a home lab** — one screen showing the health of the
 whole infrastructure in real time, plus a few things from everyday life. Zero frameworks,
 zero build step, zero dependencies: the entire UI is **one HTML file** with hand-drawn SVG
